@@ -1,6 +1,6 @@
 const express = require('express');
 const bodyParser = require('body-parser');
-const sqlite3 = require('sqlite3').verbose();
+const mysql = require('mysql'); // Use MySQL module
 const path = require('path');
 
 const app = express();
@@ -15,56 +15,76 @@ app.use(bodyParser.urlencoded({ extended: false }));
 // Serve static files from the public folder
 app.use(express.static('public'));
 
-// Setup SQLite database
-const db = new sqlite3.Database('./todo.db', (err) => {
-    if (err) {
-        console.error("Error opening database:", err.message);
-    } else {
-        console.log('Connected to the todo database.');
-    }
+// Setup MySQL database connection
+const db = mysql.createConnection({
+  host: '10.0.0.4',      // Private IP of your database VM in the backend subnet
+  user: 'admin',         // Your database username
+  password: '1234',      // Your database password
+  database: 'todo_db'    // Your database name
+});
+
+db.connect((err) => {
+  if (err) {
+    console.error('Error connecting to MySQL:', err);
+    return;
+  }
+  console.log('Connected to MySQL as id ' + db.threadId);
 });
 
 // Create the todos table if it doesn't exist
-db.serialize(() => {
-    db.run(`CREATE TABLE IF NOT EXISTS todos (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        task TEXT NOT NULL,
-        done INTEGER DEFAULT 0
-    )`);
+const createTableQuery = `
+  CREATE TABLE IF NOT EXISTS todos (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    task TEXT NOT NULL,
+    done TINYINT DEFAULT 0
+  )
+`;
+db.query(createTableQuery, (err, result) => {
+  if (err) {
+    console.error('Error creating todos table:', err);
+  } else {
+    console.log('Todos table is ready.');
+  }
 });
 
 // Route to display todos
 app.get('/', (req, res) => {
-    db.all("SELECT * FROM todos", [], (err, rows) => {
-        if (err) {
-            console.error(err.message);
-        }
-        res.render('index', { todos: rows });
-    });
+  db.query("SELECT * FROM todos", (err, results) => {
+    if (err) {
+      console.error('Error fetching todos:', err);
+      res.sendStatus(500);
+      return;
+    }
+    res.render('index', { todos: results });
+  });
 });
 
 // Route to add a new todo
 app.post('/add', (req, res) => {
-    const task = req.body.task;
-    db.run("INSERT INTO todos (task) VALUES (?)", [task], function(err) {
-        if (err) {
-            console.error(err.message);
-        }
-        res.redirect('/');
-    });
+  const task = req.body.task;
+  db.query("INSERT INTO todos (task) VALUES (?)", [task], (err, result) => {
+    if (err) {
+      console.error('Error inserting todo:', err);
+      res.sendStatus(500);
+      return;
+    }
+    res.redirect('/');
+  });
 });
 
 // Route to delete a todo
 app.post('/delete/:id', (req, res) => {
-    const id = req.params.id;
-    db.run("DELETE FROM todos WHERE id = ?", id, function(err) {
-        if (err) {
-            console.error(err.message);
-        }
-        res.redirect('/');
-    });
+  const id = req.params.id;
+  db.query("DELETE FROM todos WHERE id = ?", [id], (err, result) => {
+    if (err) {
+      console.error('Error deleting todo:', err);
+      res.sendStatus(500);
+      return;
+    }
+    res.redirect('/');
+  });
 });
 
 app.listen(PORT, () => {
-    console.log(`Server is running on port ${PORT}`);
+  console.log(`Server is running on port ${PORT}`);
 });
