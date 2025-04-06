@@ -85,6 +85,10 @@ app.post('/delete/:id', (req, res) => {
   });
 });
 
+app.get('/health', (req, res) => {
+  res.sendStatus(200);
+});
+
 app.listen(PORT, '0.0.0.0' () => {
   console.log(`Server is running on port ${PORT}`);
 });
