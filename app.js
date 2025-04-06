@@ -17,10 +17,10 @@ app.use(express.static('public'));
 
 // Setup MySQL database connection
 const db = mysql.createConnection({
-  host: '10.0.0.4',      // Private IP of your database VM in the backend subnet
-  user: 'admin',         // Your database username
-  password: '1234',      // Your database password
-  database: 'todo_db'    // Your database name
+  host: '10.0.0.4',
+  user: 'admin',
+  password: 'Todo_Admin_1234',
+  database: 'todo_db'
 });
 
 db.connect((err) => {
