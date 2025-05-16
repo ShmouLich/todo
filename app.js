@@ -22,7 +22,15 @@ const db = mysql.createConnection({
   host: process.env.DB_HOST,
   user: process.env.DB_USER,
   password: process.env.DB_PASSWORD,
-  database: process.env.DB_NAME
+  database: process.env.DB_NAME,
+  ssl: {
+    // Download the CA certificate from Azure for your MySQL server
+    // and place it in your project, then ensure it's deployed.
+    // Example: ca: fs.readFileSync(__dirname + '/DigiCertGlobalRootG2.crt.pem')
+    // For initial testing or if the above is complex to deploy immediately:
+    rejectUnauthorized: false // THIS IS INSECURE FOR PRODUCTION but can help diagnose if SSL is the core issue.
+                             // If this makes it work, you MUST properly configure the CA.
+  }
 });
 
 db.connect((err) => {
