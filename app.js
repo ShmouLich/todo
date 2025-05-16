@@ -17,10 +17,10 @@ app.use(express.static('public'));
 
 // Setup MySQL database connection
 const db = mysql.createConnection({
-  host: '10.0.0.4',
-  user: 'admin',
-  password: 'Todo_Admin_1234',
-  database: 'todo_db'
+  host: process.env.DB_HOST,
+  user: process.env.DB_USER,
+  password: process.env.DB_PASSWORD,
+  database: process.env.DB_NAME
 });
 
 db.connect((err) => {
