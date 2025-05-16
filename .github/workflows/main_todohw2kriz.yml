@@ -13,8 +13,8 @@ jobs:
       name: 'Production'
       url: ${{ steps.deploy-to-webapp.outputs.webapp-url }}
     permissions:
-      id-token: write # Required for OIDC login to Azure
-      contents: read   # Required for actions/checkout
+      id-token: write 
+      contents: read   
 
     steps:
       - name: Checkout code
@@ -23,19 +23,11 @@ jobs:
       - name: Set up Node.js version
         uses: actions/setup-node@v4
         with:
-          node-version: '20.x' # Adjusted based on your previous logs indicating Node 22 used, 20.x is LTS
+          node-version: '20.x' 
           cache: 'npm'
 
       - name: npm install
-        run: npm ci # Using 'ci' for cleaner installs based on package-lock.json
-
-      # If your app has a specific build command defined in package.json, uncomment the next two lines
-      # - name: Build application (if needed)
-      #   run: npm run build --if-present
-
-      # If you have tests defined in package.json, uncomment the next two lines
-      # - name: Run tests (if needed)
-      #   run: npm test --if-present
+        run: npm ci 
 
       - name: Login to Azure (OIDC)
         uses: azure/login@v2
@@ -45,14 +37,12 @@ jobs:
           subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_7AE2256AADEE4D4395AF916AFCB36070 }}
 
       - name: Deploy to Azure Web App
-        id: deploy-to-webapp # Added id here to reference outputs.webapp-url
+        id: deploy-to-webapp 
         uses: azure/webapps-deploy@v3
         with:
-          app-name: 'todoHw2Kriz' # Your App Service name
-          package: . # Deploy the current directory (which includes node_modules after npm ci)
-          # slot-name: 'Production' # This is the default, so it's optional unless you use other slots
+          app-name: 'todoHw2Kriz' 
+          package: . 
 
-      # Optional: Logout from Azure
       - name: Logout from Azure
         if: always()
         run: |
